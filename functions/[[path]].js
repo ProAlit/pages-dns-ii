@@ -1,5 +1,5 @@
 const UPSTREAM_DNS_PROVIDERS = [
-  { url: 'https://freedns.controld.com/p2', priority: 1, healthScore: 100, lastCheck: 0, consecutiveFailures: 0, fronting: 'freedns.controld.com' },
+  { url: 'https://freedns.controld.com/p2', priority: 1, healthScore: 100, lastCheck: 0, consecutiveFailures: 0, fronting: 'freedns.controld.com' }
 ];
 
 const DNS_CACHE_TTL_MIN = 60;
