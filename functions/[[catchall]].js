@@ -6,8 +6,8 @@ const jstontype = 'application/dns-json'
 export const onRequestGet = async ({request}) => {
 	 const { method, headers, url } = request 
 	 const searchParams = new URL(url).searchParams
-	 if (searchParams.has('q')) {
-	 return await fetch(doh + '?dns=' + searchParams.get('q'), {
+	 if (searchParams.has('dns')) {
+	 return await fetch(doh + '?dns=' + searchParams.get('dns'), {
             method: 'GET',
             headers: {
                 'Accept': contype,
