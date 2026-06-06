@@ -1,9 +1,9 @@
 /**
- * VERSION: 2.3.0
+ * VERSION: 2.4.0
  * Runtime: Cloudflare Workers Module Syntax
  */
 
-const VERSION = '2.3.0';
+const VERSION = '2.4.0';
 
 const CONFIG = {
   DEFAULT_PROFILE: 'all',
@@ -64,13 +64,20 @@ export default {
     const url = new URL(req.url);
     const clientIP = getClientIP(req);
 
+    // Intercept /status to show the JSON health snapshot
+    if (url.pathname === '/status') {
+      return jsonResponse(getHealthSnapshot(), 200, {
+        'cache-control': 'no-store'
+      });
+    }
+
     if (checkSpam(clientIP)) {
       return textResponse('Rate limit exceeded', 429, {
         'cache-control': 'no-store'
       });
     }
 
-    // Route ALL paths to the DNS handler
+    // Route ALL other paths to the DNS handler
     return handleDNS(req, url);
   }
 };
@@ -84,7 +91,6 @@ async function handleDNS(req, url) {
   try {
     payload = await readDNSPayload(req, url);
   } catch (err) {
-    // Return 404 for any invalid DNS payload/request
     return textResponse('Not found', err.status || 404, {
       'cache-control': 'no-store'
     });
@@ -469,6 +475,29 @@ function getClientIP(req) {
     || 'unknown';
 }
 
+function getHealthSnapshot() {
+  const profiles = {};
+
+  for (const [profile, nodes] of Object.entries(APP_STATE.resolversByProfile)) {
+    profiles[profile] = nodes.map((node) => ({
+      url: node.url,
+      score: node.score,
+      ok: node.ok,
+      fail: node.fail,
+      timeout: node.timeout,
+      lastLatencyMs: node.lastLatencyMs,
+      lastError: node.lastError
+    }));
+  }
+
+  return {
+    version: VERSION,
+    cacheEntries: APP_STATE.cache.size,
+    throttleEntries: APP_STATE.throttle.size,
+    profiles
+  };
+}
+
 function dnsResponse(body, extraHeaders = {}) {
   return new Response(body, {
     status: 200,
@@ -485,6 +514,16 @@ function textResponse(text, status = 200, headers = {}) {
     status,
     headers: {
       'content-type': 'text/plain; charset=utf-8',
+      ...headers
+    }
+  });
+}
+
+function jsonResponse(data, status = 200, headers = {}) {
+  return new Response(JSON.stringify(data, null, 2), {
+    status,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
       ...headers
     }
   });
