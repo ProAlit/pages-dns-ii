@@ -1,5 +1,5 @@
-const doh = 'https://freedns.controld.com/no-ads-malware-typo-gambling-dating'
-const dohjson = 'https://freedns.controld.com/no-ads-malware-typo-gambling-dating'
+const doh = 'https://freedns.controld.com/no-ads-dating-drugs-gambling-typo-malware'
+const dohjson = 'https://freedns.controld.com/no-ads-dating-drugs-gambling-typo-malware'
 const contype = 'application/dns-message'
 const jstontype = 'application/dns-json'
 
